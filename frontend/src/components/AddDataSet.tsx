@@ -1,17 +1,25 @@
-import { useRef, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Header from "./Header";
 import { FaPaperPlane } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useCsvFileHandler } from "../hooks/useCsvFileHandler";
 
 const AddDatasetPage = () => {
     const [title, setTitle] = useState("");
-    const [description, setdescription] = useState("");
-    const [tags, setTags] = useState<string[]>([]);
-    const [newTag, setNewTag] = useState("");
+    const [description, setDescription] = useState("");
+    const [tags, setTags] = useState<string[]>([]); 
+    const [newTag, setNewTag] = useState(""); 
     const [fileName, setFileName] = useState<string>("");
     const [fileUploaded, setFileUploaded] = useState<boolean>(false);
     const descriptionTextareaRef = useRef(null);
     const navigate = useNavigate();
+
+    const {
+        previewCsv,
+        fullCsv,
+        parseCsvFile,
+        uploadToIpfs,
+    } = useCsvFileHandler();
 
     const adjustTextareaHeight = (event: React.FormEvent<HTMLTextAreaElement>): void => {
         const textarea = event.target as HTMLTextAreaElement;
@@ -40,12 +48,38 @@ const AddDatasetPage = () => {
         setTags(tags.filter((_, i) => i !== index));
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+
         if (e.target.files && e.target.files[0]) {
-            setFileName(e.target.files[0].name);
+            const file = e.target.files[0];
+            setFileName(file.name);
             setFileUploaded(true);
+
+            parseCsvFile(file);
         }
     };
+
+    useEffect(() => {
+        if (previewCsv && fullCsv) {
+            console.log(fullCsv);
+            console.log(previewCsv);
+
+            try {
+                const previewFile = new File([previewCsv], "preview.csv", { type: "text/csv" });
+                const fullFile = new File([fullCsv], "full.csv", { type: "text/csv" });
+
+                uploadToIpfs(previewFile, true).then((previewCid) => {
+                    console.log("Preview CID:", previewCid);
+                });
+
+                uploadToIpfs(fullFile, false).then((fullCid) => {
+                    console.log("Full Dataset CID:", fullCid);
+                });
+            } catch (err) {
+                console.error("Error uploading CSVs to IPFS:", err);
+            }
+        }
+    }, [previewCsv, fullCsv]); 
 
     return (
         <>
@@ -87,7 +121,7 @@ const AddDatasetPage = () => {
                                 id="description"
                                 ref={descriptionTextareaRef}
                                 value={description}
-                                onChange={(e) => setdescription(e.target.value)}
+                                onChange={(e) => setDescription(e.target.value)}
                                 className="w-full p-2 border rounded-lg text-sm"
                                 rows={10}
                                 onInput={adjustTextareaHeight}
@@ -174,7 +208,6 @@ const AddDatasetPage = () => {
                                 </div>
                             </div>
                         </div>
-
 
                         <div className="flex justify-between items-center">
                             <div className="flex space-x-4">
