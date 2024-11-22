@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#root {
+  --color-primary: #ec4755;
+  --color-secondary: #a12c34;
+  --color-tertiaty: #99a0a3;
+}
+
+a {
+  @apply text-red-700;
+}
+
+body{
+  @apply bg-background
+}
+
+::-webkit-scrollbar {
+  width: 0;  /* Remove scrollbar space */
+  height: 0;
+  background: transparent;  /* Optional: just make scrollbar invisible */
+}
+
+
+.content p {
+  @apply my-6;
+}
+
+.content ul {
+  @apply my-6;
+}

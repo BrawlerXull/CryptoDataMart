@@ -1,0 +1,25 @@
+{
+    "company": {
+      "name": "CryptoDataMart",
+      "logo": "/assets/images/logo.png"
+    },
+  
+    "callToAction": {
+      "text": "Get started",
+      "href": "#"
+    },
+    "mainHero": {
+      "title": "Welcome to CryptoDataMart",
+      "subtitle": "Empower Your CryptoDataMart Journey",
+      "description": "CryptoDataMart is a Blockchain-Powered AI Marketplace that enables users to buy, sell, or rent AI models and datasets directly from creators. This decentralized platform allows AI researchers and developers to securely monetize their work and collaborate on AI projects using smart contracts. With features like decentralized licensing, AI model and dataset marketplaces, and transparent reward distribution, CryptoDataMart empowers creators while maintaining data privacy and security.",
+      "img": "/assets/images/hero_image.png",
+      "primaryAction": {
+        "text": "Dashboard",
+        "to": "/dashboard"
+      },
+      "secondaryAction": {
+        "text": "Community",
+        "to": "/community"
+      }
+    }
+  }
