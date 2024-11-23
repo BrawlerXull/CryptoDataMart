@@ -8,6 +8,7 @@ interface ListingData {
   creator: string;
   price: ethers.BigNumber;
   tags: string[];
+  likes: number;
 }
 
 const useListingContract = () => {
@@ -15,7 +16,6 @@ const useListingContract = () => {
   const [listingData, setListingData] = useState<ListingData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [creatingListing, setCreatingListing] = useState<boolean>(false);
-
 
   const [ipfsLink, setIpfsLink] = useState<string>('');
   const [previewIpfsLink, setPreviewIpfsLink] = useState<string>('');
@@ -58,13 +58,13 @@ const useListingContract = () => {
 
       const listingsPromises = [];
       for (let i = 0; i < nextListingId.toNumber(); i++) {
-        listingsPromises.push(fetchListingData(provider, i));
+        listingsPromises.push(fetchListingData(provider, i)); 
       }
 
       const listings = await Promise.all(listingsPromises);
       console.log('Fetched All Listings:', listings);
 
-      setListingData(listings);
+      setListingData(listings); 
     } catch (err: any) {
       console.error('Error fetching listings:', err);
       alert('An error occurred while fetching the listings.');
@@ -72,7 +72,6 @@ const useListingContract = () => {
       setIsLoading(false);
     }
   };
-
 
   const createNewListing = async (
     previewCid: string,
@@ -93,7 +92,6 @@ const useListingContract = () => {
     const contractWithSigner = contract.connect(signer);
 
     try {
-
       const tx = await contractWithSigner.createListing(
         previewCid,
         fullCid,
@@ -105,9 +103,8 @@ const useListingContract = () => {
       console.log('Transaction sent:', tx);
       await tx.wait(); 
       console.log('Listing created successfully.');
-      toast.success('Listing created successfully.')
+      toast.success('Listing created successfully.');
 
-    
       fetchAllListings();
     } catch (err) {
       console.error('Error creating listing:', err);

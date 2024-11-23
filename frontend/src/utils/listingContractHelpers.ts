@@ -22,6 +22,7 @@ export const fetchListingData = async (provider: ethers.providers.Web3Provider, 
       creator: data.creator,
       price: data.price,
       tags: data.tags,
+      likes: Number(data.likes)
     };
   } catch (err) {
     console.error(`Error fetching listing data for ID ${listingId}:`, err);

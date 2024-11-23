@@ -3,6 +3,9 @@ import { FaPlus, FaPaperPlane } from "react-icons/fa";
 import Header from "../components/Header";
 import { Link } from "react-router-dom";
 import Spinner from "../components/Spinner";
+import  useListingContract  from "../hooks/useListingContract";
+import { ethers } from "ethers";
+
 
 const DashboardPage = () => {
   const [sortMethod, setSortMethod] = useState("recent");
@@ -10,6 +13,9 @@ const DashboardPage = () => {
   const [loadingFirstTime, setLoadingFirstTime] = useState(true);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
+
+  const { listingData } = useListingContract(); 
+
 
   useEffect(() => {
     setLoadingFirstTime(false);
@@ -103,6 +109,39 @@ const DashboardPage = () => {
               </span>
             ))}
           </div>
+          <section className="space-y-8 mt-8">
+            {listingData.map((listing, index) => (
+              <div
+                key={index}
+                className="bg-background p-4 rounded-lg shadow-xl border border-secondary/80"
+              >
+                <div>
+                  <h3 className="font-bold text-lg text-primary_text line-clamp-1">
+                    {listing.tags.join(", ")} {/* Display tags here */}
+                  </h3>
+                </div>
+                <div className="mb-2">
+                  <p className="text-primary/80">Price: {ethers.utils.formatEther(listing.price)} ETH</p>
+                  <p className="text-primary/80">Rent per Hour: {listing.price.toString()} Wei/hr</p>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-secondary_text mt-4">
+                  <div className="flex items-center mb-2 sm:mb-0">
+                    <p
+                      className="text-secondary_text text-sm"
+                    >
+                      Creator: {listing.creator}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="flex items-center mr-4">
+                      <FaPaperPlane className="mr-2" /> {listing.likes}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </section>
+
 
           <div className="flex justify-center mt-8">
             <button
