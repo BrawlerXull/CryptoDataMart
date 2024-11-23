@@ -3,9 +3,8 @@ import { FaPlus, FaPaperPlane } from "react-icons/fa";
 import Header from "../components/Header";
 import { Link } from "react-router-dom";
 import Spinner from "../components/Spinner";
-import  useListingContract  from "../hooks/useListingContract";
+import useListingContract from "../hooks/useListingContract";
 import { ethers } from "ethers";
-
 
 const DashboardPage = () => {
   const [sortMethod, setSortMethod] = useState("recent");
@@ -13,20 +12,26 @@ const DashboardPage = () => {
   const [loadingFirstTime, setLoadingFirstTime] = useState(true);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
+  
+  const { listingData } = useListingContract();
+  
+  const listingsPerPage = 10;
 
-  const { listingData } = useListingContract(); 
+  const startIdx = (page - 1) * listingsPerPage;
+  const endIdx = page * listingsPerPage;
+  const paginatedListings = listingData.slice(startIdx, endIdx);
 
+  const totalPages = Math.ceil(listingData.length / listingsPerPage);
 
   useEffect(() => {
     setLoadingFirstTime(false);
   }, []);
 
-  
   const handleAddTag = (
     e: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
   ) => {
     if (e instanceof KeyboardEvent && e.key === "Enter") {
-      e.preventDefault(); 
+      e.preventDefault();
     }
     if (
       newTag.trim() &&
@@ -35,13 +40,12 @@ const DashboardPage = () => {
         .includes(newTag.trim().toLowerCase())
     ) {
       setTags((prevTags) => [...prevTags, newTag.trim()]);
-      setNewTag(""); 
+      setNewTag("");
     }
   };
 
-  
   const handleTagRemove = (index: number) => {
-    setTags((prevTags) => prevTags.filter((_, i) => i !== index)); 
+    setTags((prevTags) => prevTags.filter((_, i) => i !== index));
   };
 
   if (loadingFirstTime) {
@@ -110,14 +114,14 @@ const DashboardPage = () => {
             ))}
           </div>
           <section className="space-y-8 mt-8">
-            {listingData.map((listing, index) => (
+            {paginatedListings.map((listing, index) => (
               <div
                 key={index}
                 className="bg-background p-4 rounded-lg shadow-xl border border-secondary/80"
               >
                 <div>
                   <h3 className="font-bold text-lg text-primary_text line-clamp-1">
-                    {listing.tags.join(", ")} {/* Display tags here */}
+                    {listing.tags.join(", ")}
                   </h3>
                 </div>
                 <div className="mb-2">
@@ -126,11 +130,7 @@ const DashboardPage = () => {
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-secondary_text mt-4">
                   <div className="flex items-center mb-2 sm:mb-0">
-                    <p
-                      className="text-secondary_text text-sm"
-                    >
-                      Creator: {listing.creator}
-                    </p>
+                    <p className="text-secondary_text text-sm">Creator: {listing.creator}</p>
                   </div>
                   <div className="flex items-center">
                     <span className="flex items-center mr-4">
@@ -142,7 +142,7 @@ const DashboardPage = () => {
             ))}
           </section>
 
-
+          {/* Pagination Controls */}
           <div className="flex justify-center mt-8">
             <button
               onClick={() => setPage(page - 1)}
@@ -153,6 +153,7 @@ const DashboardPage = () => {
             </button>
             <button
               onClick={() => setPage(page + 1)}
+              disabled={page === totalPages}
               className="px-4 py-2 mx-1 bg-primary text-primary_text rounded-lg disabled:opacity-50"
             >
               Next
