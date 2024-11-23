@@ -12,16 +12,21 @@ const DashboardPage = () => {
   const [loadingFirstTime, setLoadingFirstTime] = useState(true);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
-  
+
   const { listingData } = useListingContract();
-  
+
   const listingsPerPage = 10;
+
+  const filteredListings = listingData.filter((listing) => {
+    if (tags.length === 0) return true; 
+    return tags.every(tag => listing.tags.some(listingTag => listingTag.toLowerCase().includes(tag.toLowerCase())));
+  });
 
   const startIdx = (page - 1) * listingsPerPage;
   const endIdx = page * listingsPerPage;
-  const paginatedListings = listingData.slice(startIdx, endIdx);
+  const paginatedListings = filteredListings.slice(startIdx, endIdx);
 
-  const totalPages = Math.ceil(listingData.length / listingsPerPage);
+  const totalPages = Math.ceil(filteredListings.length / listingsPerPage);
 
   useEffect(() => {
     setLoadingFirstTime(false);
@@ -142,7 +147,6 @@ const DashboardPage = () => {
             ))}
           </section>
 
-          {/* Pagination Controls */}
           <div className="flex justify-center mt-8">
             <button
               onClick={() => setPage(page - 1)}
