@@ -3,8 +3,7 @@ import Header from "./Header";
 import { FaPaperPlane } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useCsvFileHandler } from "../hooks/useCsvFileHandler";
-import { ethers } from "ethers";
-import useListingContract from "../hooks/useListingContract"; // Ensure this hook handles contract interaction
+import useListingContract from "../hooks/useListingContract"; 
 
 const AddDatasetPage = () => {
     const [price, setPrice] = useState(0);
@@ -15,6 +14,8 @@ const AddDatasetPage = () => {
     const [fileUploaded, setFileUploaded] = useState<boolean>(false);
     const [isCreatingListing, setIsCreatingListing] = useState(false);
     const [createListingError, setCreateListingError] = useState<string | null>(null);
+    const [previewCid , setPreviewCid] = useState("");
+    const [fullCid , setFullCid] = useState("");
 
     const navigate = useNavigate();
 
@@ -25,7 +26,7 @@ const AddDatasetPage = () => {
         uploadToIpfs,
     } = useCsvFileHandler();
 
-    const { createNewListing } = useListingContract(); // Get createNewListing function from the hook
+    const { createNewListing } = useListingContract(); 
 
     const handleAddTag = (
         e: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
@@ -66,15 +67,13 @@ const AddDatasetPage = () => {
                 const previewFile = new File([previewCsv], "preview.csv", { type: "text/csv" });
                 const fullFile = new File([fullCsv], "full.csv", { type: "text/csv" });
 
-                // Upload to IPFS
-                uploadToIpfs(previewFile, true).then((previewCid) => {
+                uploadToIpfs(previewFile, true).then((cidPreview) => {
                     console.log("Preview CID:", previewCid);
+                    setPreviewCid(cidPreview)
 
-                    // Once preview is uploaded, upload full dataset and then create the listing
-                    uploadToIpfs(fullFile, false).then((fullCid) => {
+                    uploadToIpfs(fullFile, false).then((cidFull) => {
                         console.log("Full Dataset CID:", fullCid);
-                        // Create the listing with IPFS CIDs and form values
-                        // createListing(previewCid, fullCid); // Call createListing with CIDs and other form data
+                        setFullCid(cidFull);
                     });
                 });
             } catch (err) {
@@ -83,14 +82,13 @@ const AddDatasetPage = () => {
         }
     }, [previewCsv, fullCsv]);
 
-    const createListing = async (previewCid: string, fullCid: string) => {
+    const createListing = async () => {
         setIsCreatingListing(true);
         setCreateListingError(null);
 
         try {
-            // Pass the form data (price, rent, tags, IPFS links) to the contract
             await createNewListing(previewCid, fullCid, price, rent, tags);
-            navigate("/dashboard"); // Navigate to dashboard once the listing is created
+            navigate("/dashboard");
         } catch (error) {
             console.error("Error creating listing:", error);
             setCreateListingError("Failed to create the listing. Please try again.");
@@ -235,7 +233,7 @@ const AddDatasetPage = () => {
                             <div className="flex space-x-4">
                                 <button
                                     type="button"
-                                    onClick={() => createListing("", "")} // Replace with valid CIDs
+                                    onClick={() => createListing()}
                                     className="bg-primary text-primary_text hover:bg-border hover:text-primary px-4 py-2 rounded-lg"
                                     disabled={isCreatingListing}
                                 >
