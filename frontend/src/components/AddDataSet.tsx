@@ -1,17 +1,21 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Header from "./Header";
 import { FaPaperPlane } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useCsvFileHandler } from "../hooks/useCsvFileHandler";
+import { ethers } from "ethers";
+import useListingContract from "../hooks/useListingContract"; // Ensure this hook handles contract interaction
 
 const AddDatasetPage = () => {
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [tags, setTags] = useState<string[]>([]); 
-    const [newTag, setNewTag] = useState(""); 
+    const [price, setPrice] = useState(0);
+    const [rent, setRent] = useState(0);
+    const [tags, setTags] = useState<string[]>([]);
+    const [newTag, setNewTag] = useState("");
     const [fileName, setFileName] = useState<string>("");
     const [fileUploaded, setFileUploaded] = useState<boolean>(false);
-    const descriptionTextareaRef = useRef(null);
+    const [isCreatingListing, setIsCreatingListing] = useState(false);
+    const [createListingError, setCreateListingError] = useState<string | null>(null);
+
     const navigate = useNavigate();
 
     const {
@@ -21,11 +25,7 @@ const AddDatasetPage = () => {
         uploadToIpfs,
     } = useCsvFileHandler();
 
-    const adjustTextareaHeight = (event: React.FormEvent<HTMLTextAreaElement>): void => {
-        const textarea = event.target as HTMLTextAreaElement;
-        textarea.style.height = "auto";
-        textarea.style.height = `${textarea.scrollHeight}px`;
-    };
+    const { createNewListing } = useListingContract(); // Get createNewListing function from the hook
 
     const handleAddTag = (
         e: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
@@ -49,12 +49,10 @@ const AddDatasetPage = () => {
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setFileName(file.name);
             setFileUploaded(true);
-
             parseCsvFile(file);
         }
     };
@@ -68,18 +66,38 @@ const AddDatasetPage = () => {
                 const previewFile = new File([previewCsv], "preview.csv", { type: "text/csv" });
                 const fullFile = new File([fullCsv], "full.csv", { type: "text/csv" });
 
+                // Upload to IPFS
                 uploadToIpfs(previewFile, true).then((previewCid) => {
                     console.log("Preview CID:", previewCid);
-                });
 
-                uploadToIpfs(fullFile, false).then((fullCid) => {
-                    console.log("Full Dataset CID:", fullCid);
+                    // Once preview is uploaded, upload full dataset and then create the listing
+                    uploadToIpfs(fullFile, false).then((fullCid) => {
+                        console.log("Full Dataset CID:", fullCid);
+                        // Create the listing with IPFS CIDs and form values
+                        // createListing(previewCid, fullCid); // Call createListing with CIDs and other form data
+                    });
                 });
             } catch (err) {
                 console.error("Error uploading CSVs to IPFS:", err);
             }
         }
-    }, [previewCsv, fullCsv]); 
+    }, [previewCsv, fullCsv]);
+
+    const createListing = async (previewCid: string, fullCid: string) => {
+        setIsCreatingListing(true);
+        setCreateListingError(null);
+
+        try {
+            // Pass the form data (price, rent, tags, IPFS links) to the contract
+            await createNewListing(previewCid, fullCid, price, rent, tags);
+            navigate("/dashboard"); // Navigate to dashboard once the listing is created
+        } catch (error) {
+            console.error("Error creating listing:", error);
+            setCreateListingError("Failed to create the listing. Please try again.");
+        } finally {
+            setIsCreatingListing(false);
+        }
+    };
 
     return (
         <>
@@ -89,47 +107,7 @@ const AddDatasetPage = () => {
             <div className="min-h-screen bg-background text-primary_text p-4 flex flex-col items-center">
                 <div className="w-full lg:w-2/3 bg-background p-4 rounded-lg shadow-lg">
                     <h1 className="text-3xl font-bold mb-4">Add New Dataset</h1>
-                    <form className="space-y-4">
-                        <div>
-                            <label
-                                className="block text-primary_text font-bold mb-2"
-                                htmlFor="title"
-                            >
-                                Title
-                            </label>
-                            <input
-                                autoFocus
-                                id="title"
-                                type="text"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                className="w-full p-2 border rounded-lg"
-                                placeholder="Write the title of dataset here."
-                                required
-                            />
-                        </div>
-                        <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <label
-                                    className="block text-primary_text font-bold"
-                                    htmlFor="description"
-                                >
-                                    Description
-                                </label>
-                            </div>
-                            <textarea
-                                id="description"
-                                ref={descriptionTextareaRef}
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                className="w-full p-2 border rounded-lg text-sm"
-                                rows={10}
-                                onInput={adjustTextareaHeight}
-                                placeholder="Write your description here."
-                                required
-                            />
-                        </div>
-
+                    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                         <div>
                             <label
                                 className="block text-primary_text font-bold mb-2"
@@ -164,6 +142,44 @@ const AddDatasetPage = () => {
                                     File "{fileName}" uploaded successfully!
                                 </div>
                             )}
+                        </div>
+
+                        <div>
+                            <label
+                                className="block text-primary_text font-bold mb-2"
+                                htmlFor="price"
+                            >
+                                Price
+                            </label>
+                            <input
+                                autoFocus
+                                id="price"
+                                type="number"
+                                value={price}
+                                onChange={(e) => setPrice(e.target.valueAsNumber)}
+                                className="w-full p-2 border rounded-lg"
+                                placeholder="Write the price of dataset here."
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                className="block text-primary_text font-bold mb-2"
+                                htmlFor="rent"
+                            >
+                                Rent (Wei / hr)
+                            </label>
+                            <input
+                                autoFocus
+                                id="rent"
+                                type="number"
+                                value={rent}
+                                onChange={(e) => setRent(e.target.valueAsNumber)}
+                                className="w-full p-2 border rounded-lg"
+                                placeholder="Write the rent of dataset here."
+                                required
+                            />
                         </div>
 
                         <div>
@@ -209,13 +225,21 @@ const AddDatasetPage = () => {
                             </div>
                         </div>
 
+                        {createListingError && (
+                            <div className="text-red-500 mt-2">
+                                {createListingError}
+                            </div>
+                        )}
+
                         <div className="flex justify-between items-center">
                             <div className="flex space-x-4">
                                 <button
-                                    type="submit"
+                                    type="button"
+                                    onClick={() => createListing("", "")} // Replace with valid CIDs
                                     className="bg-primary text-primary_text hover:bg-border hover:text-primary px-4 py-2 rounded-lg"
+                                    disabled={isCreatingListing}
                                 >
-                                    Upload Dataset
+                                    {isCreatingListing ? "Creating..." : "Upload Dataset"}
                                 </button>
                                 <button
                                     type="button"
