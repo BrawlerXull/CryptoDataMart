@@ -9,6 +9,7 @@ interface ListingData {
   price: ethers.BigNumber;
   tags: string[];
   likes: number;
+  creationTime: number;
 }
 
 const useListingContract = () => {

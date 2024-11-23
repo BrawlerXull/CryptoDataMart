@@ -19,14 +19,29 @@ const DashboardPage = () => {
 
   const filteredListings = listingData.filter((listing) => {
     if (tags.length === 0) return true; 
-    return tags.every(tag => listing.tags.some(listingTag => listingTag.toLowerCase().includes(tag.toLowerCase())));
+    return tags.every(tag =>
+      listing.tags.some(listingTag => listingTag.toLowerCase().includes(tag.toLowerCase()))
+    );
+  });
+
+  const sortedListings = filteredListings.sort((a, b) => {
+    switch (sortMethod) {
+      case "recent":
+        return b.creationTime - a.creationTime;
+      case "oldest":
+        return a.creationTime - b.creationTime;
+      case "popularity":
+        return b.likes - a.likes;
+      default:
+        return 0;
+    }
   });
 
   const startIdx = (page - 1) * listingsPerPage;
   const endIdx = page * listingsPerPage;
-  const paginatedListings = filteredListings.slice(startIdx, endIdx);
+  const paginatedListings = sortedListings.slice(startIdx, endIdx);
 
-  const totalPages = Math.ceil(filteredListings.length / listingsPerPage);
+  const totalPages = Math.ceil(sortedListings.length / listingsPerPage);
 
   useEffect(() => {
     setLoadingFirstTime(false);
@@ -75,7 +90,6 @@ const DashboardPage = () => {
                 <option value="recent">Recent</option>
                 <option value="oldest">Oldest</option>
                 <option value="popularity">Popularity</option>
-                <option value="views">Most Viewed</option>
               </select>
               <div className="flex items-center">
                 <input
@@ -126,13 +140,15 @@ const DashboardPage = () => {
               >
                 <div>
                   <h3 className="font-bold text-lg text-primary_text line-clamp-1">
-                    {listing.tags.join(", ")}
+                    Title Placeholder: {`Dataset #${index + 1}`}
                   </h3>
                 </div>
+
                 <div className="mb-2">
                   <p className="text-primary/80">Price: {ethers.utils.formatEther(listing.price)} ETH</p>
                   <p className="text-primary/80">Rent per Hour: {listing.price.toString()} Wei/hr</p>
                 </div>
+
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-secondary_text mt-4">
                   <div className="flex items-center mb-2 sm:mb-0">
                     <p className="text-secondary_text text-sm">Creator: {listing.creator}</p>
@@ -142,6 +158,24 @@ const DashboardPage = () => {
                       <FaPaperPlane className="mr-2" /> {listing.likes}
                     </span>
                   </div>
+                </div>
+
+                <div className="flex items-center">
+                  <h4 className="text-lg font-semibold text-primary_text mr-5">Tags</h4>
+                  {listing.tags.length > 0 ? (
+                    <div className="flex flex-wrap mt-2">
+                      {listing.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="bg-primary/10 text-primary_text/70 px-2 py-1 rounded-sm mr-2 mb-2 text-base"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-primary/60">No tags available for this dataset.</p>
+                  )}
                 </div>
               </div>
             ))}
