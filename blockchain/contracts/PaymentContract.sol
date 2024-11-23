@@ -19,7 +19,7 @@ contract PaymentContract {
 
         require(listing.isActive, "Dataset not available for rent");
         require(msg.value >= listing.rentPricePerHour * _rentDuration, "Incorrect rent price");
-        require(_rentDuration >= listing.minRentDuration && _rentDuration <= listing.maxRentDuration, "Rent duration out of range");
+        require(_rentDuration >= listing.minRentDuration, "Rent duration out of range");
 
         listingContract.rentDataset{value: msg.value}(_listingId, _rentDuration , msg.sender);
 

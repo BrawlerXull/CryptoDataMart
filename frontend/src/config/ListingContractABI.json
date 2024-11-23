@@ -38,6 +38,25 @@
 			{
 				"indexed": false,
 				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "DatasetLiked",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "listingId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
 				"name": "buyer",
 				"type": "address"
 			}
@@ -82,6 +101,25 @@
 			{
 				"indexed": false,
 				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "DatasetUnliked",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "listingId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
 				"name": "creator",
 				"type": "address"
 			},
@@ -111,8 +149,14 @@
 			},
 			{
 				"indexed": false,
+				"internalType": "string[]",
+				"name": "tags",
+				"type": "string[]"
+			},
+			{
+				"indexed": false,
 				"internalType": "uint256",
-				"name": "maxRentDuration",
+				"name": "creationTime",
 				"type": "uint256"
 			}
 		],
@@ -142,6 +186,19 @@
 		"anonymous": false,
 		"inputs": [
 			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "newMinRentDuration",
+				"type": "uint256"
+			}
+		],
+		"name": "MinRentDurationUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
 				"indexed": true,
 				"internalType": "address",
 				"name": "previousOwner",
@@ -158,11 +215,35 @@
 		"type": "event"
 	},
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "listingId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string[]",
+				"name": "newTags",
+				"type": "string[]"
+			}
+		],
+		"name": "TagsUpdated",
+		"type": "event"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
 				"name": "_listingId",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "buyerAddress",
+				"type": "address"
 			}
 		],
 		"name": "buyDataset",
@@ -217,14 +298,9 @@
 				"type": "uint256"
 			},
 			{
-				"internalType": "uint256",
-				"name": "_minRentDuration",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_maxRentDuration",
-				"type": "uint256"
+				"internalType": "string[]",
+				"name": "_tags",
+				"type": "string[]"
 			}
 		],
 		"name": "createListing",
@@ -318,14 +394,24 @@
 						"type": "uint256"
 					},
 					{
-						"internalType": "uint256",
-						"name": "maxRentDuration",
-						"type": "uint256"
-					},
-					{
 						"internalType": "bool",
 						"name": "isActive",
 						"type": "bool"
+					},
+					{
+						"internalType": "string[]",
+						"name": "tags",
+						"type": "string[]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "creationTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "likes",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct ListingContract.Listing",
@@ -350,6 +436,43 @@
 				"internalType": "string",
 				"name": "",
 				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_listingId",
+				"type": "uint256"
+			}
+		],
+		"name": "likeDataset",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "likedBy",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -401,14 +524,32 @@
 				"type": "uint256"
 			},
 			{
-				"internalType": "uint256",
-				"name": "maxRentDuration",
-				"type": "uint256"
-			},
-			{
 				"internalType": "bool",
 				"name": "isActive",
 				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "creationTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "likes",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "minRentDuration",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -441,6 +582,19 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_listingId",
+				"type": "uint256"
+			}
+		],
+		"name": "removeLikeDataset",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "renounceOwnership",
 		"outputs": [],
@@ -458,6 +612,11 @@
 				"internalType": "uint256",
 				"name": "_rentDuration",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "renterAddress",
+				"type": "address"
 			}
 		],
 		"name": "rentDataset",
@@ -471,6 +630,11 @@
 				"internalType": "address",
 				"name": "",
 				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"name": "renterAccessExpiration",
@@ -482,6 +646,37 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_newMinRentDuration",
+				"type": "uint256"
+			}
+		],
+		"name": "setMinRentDuration",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_listingId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string[]",
+				"name": "_newTags",
+				"type": "string[]"
+			}
+		],
+		"name": "setTags",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
