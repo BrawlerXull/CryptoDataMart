@@ -18,10 +18,10 @@ contract PaymentContract {
         ListingContract.Listing memory listing = listingContract.getListing(_listingId);
 
         require(listing.isActive, "Dataset not available for rent");
-        require(msg.value == listing.rentPricePerHour * _rentDuration, "Incorrect rent price");
+        require(msg.value >= listing.rentPricePerHour * _rentDuration, "Incorrect rent price");
         require(_rentDuration >= listing.minRentDuration && _rentDuration <= listing.maxRentDuration, "Rent duration out of range");
 
-        listingContract.rentDataset{value: msg.value}(_listingId, _rentDuration);
+        listingContract.rentDataset{value: msg.value}(_listingId, _rentDuration , msg.sender);
 
         emit DatasetRented(msg.sender, _listingId, block.timestamp + _rentDuration);
     }
@@ -30,9 +30,9 @@ contract PaymentContract {
         ListingContract.Listing memory listing = listingContract.getListing(_listingId);
 
         require(listing.isActive, "Dataset not available for purchase");
-        require(msg.value == listing.price, "Incorrect price to buy the dataset");
+        require(msg.value >= listing.price, "Incorrect price to buy the dataset");
 
-        listingContract.buyDataset{value: msg.value}(_listingId);
+        listingContract.buyDataset{value: msg.value}(_listingId , msg.sender);
 
         emit DatasetPurchased(msg.sender, _listingId);
     }

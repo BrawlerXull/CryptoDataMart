@@ -169,6 +169,11 @@
 						"internalType": "uint256",
 						"name": "_listingId",
 						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "buyerAddress",
+						"type": "address"
 					}
 				],
 				"name": "buyDataset",
@@ -464,6 +469,11 @@
 						"internalType": "uint256",
 						"name": "_rentDuration",
 						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "renterAddress",
+						"type": "address"
 					}
 				],
 				"name": "rentDataset",
@@ -477,6 +487,11 @@
 						"internalType": "address",
 						"name": "",
 						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
 					}
 				],
 				"name": "renterAccessExpiration",
@@ -570,11 +585,11 @@
 			]
 		},
 		"contracts/ListingContract.sol": {
-			"keccak256": "0x564bb390d44edf83b92ea7036eae5241965f42d32636c9bcde1a1716de354da2",
+			"keccak256": "0x7e869ad004a9d3665a7b280691ef375094881abd0f9a6c9eb85ebfa73c6e3c51",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://742893b93bae9cbccabaf4acd6fd7dfdcde0d35ebbcad2661cdb13010f23b90d",
-				"dweb:/ipfs/QmP1GoEMjWU6YyFALXTBjfMXyE9bpDvVPqsrx2FJ95m2LU"
+				"bzz-raw://013633638002a7efea488757370a1d1d8079e690357c290a0e5a40cf93c19e21",
+				"dweb:/ipfs/QmNe3UHsXoN9FqDuk557Pzh7h4BXQfGY7R5muLLFH7YSji"
 			]
 		}
 	},
