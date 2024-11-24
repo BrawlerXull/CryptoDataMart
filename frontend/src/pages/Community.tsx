@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import Header from "./Header";
-import Spinner from "./Spinner";
+import Spinner from "../components/Spinner";
+import Header from "../components/Header";
 
 const Community = () => {
     const [page, setPage] = useState(1);

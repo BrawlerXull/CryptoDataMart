@@ -9,8 +9,9 @@ import { useDatasetDescription } from "../hooks/useDatasetDescription";
 import { Listing } from "../types/listing";
 import { formatCreationTime } from "../utils/helphers";
 import toast from "react-hot-toast";
-import { FaBook, FaEnvelopeOpenText , FaRobot } from "react-icons/fa";
-import useGeminiQuery from "../hooks/useGeminiQuery";
+import DatasetDescription from "../components/DatasetDescription";
+import AskAISection from "../components/AskAISection";
+import DatasetPreview from "../components/DatasetPreview";
 import BuyDatasetSection from "../components/BuyDatasetSection";
 
 const DatasetPage = () => {
@@ -33,10 +34,14 @@ const DatasetPage = () => {
     csvData
   );
 
-  const { response, loading: queryLoading, askQuery } = useGeminiQuery();
-  const [userQuery, setUserQuery] = useState<string>("");
-  const [, setIsQuerySubmitted] = useState<boolean>(false);
-  const [responses, setResponses] = useState<string[]>([]);
+  const handlePurchase = () => {
+    if (!dataset?.price) {
+      toast.error("This dataset is not available for purchase.");
+      return;
+    }
+
+    toast.success(`Proceeding to buy the dataset for ${dataset.price}`);
+  };
 
   useEffect(() => {
     if (id) {
@@ -53,46 +58,6 @@ const DatasetPage = () => {
       toast.error(`Error loading CSV data: ${csvError || "Unknown error"}`);
     }
   }, [csvError]);
-
-  const handleQuerySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userQuery.trim()) {
-      toast.error("Please enter a valid query.");
-      return;
-    }
-    setIsQuerySubmitted(true);
-    askQuery(userQuery, csvData);
-    setUserQuery("");
-  };
-
-  useEffect(() => {
-    if (response) {
-      setResponses((prevResponses) => [...prevResponses, response]);
-    }
-  }, [response]);
-
-  const formatDescription = (description: string) => {
-    const sentences = description
-      .split(".")
-      .map((sentence) => sentence.trim())
-      .filter(Boolean);
-    return (
-      <ul className="list-disc pl-5">
-        {sentences.map((sentence, index) => (
-          <li key={index}>{sentence}.</li>
-        ))}
-      </ul>
-    );
-  };
-
-  const handlePurchase = () => {
-    if (!dataset?.price) {
-      toast.error("This dataset is not available for purchase.");
-      return;
-    }
-
-    toast.success(`Proceeding to buy the dataset for ${dataset.price}`);
-  };
 
   if (promptLoading || descriptionLoading || csvLoading) {
     return (
@@ -129,104 +94,9 @@ const DatasetPage = () => {
             </div>
           </div>
 
-          <div className="mt-8">
-            <div className="flex items-center">
-              <h4 className="text-2xl font-semibold text-primary_text">
-                Description
-              </h4>
-              <FaEnvelopeOpenText className="w-10" />
-            </div>
-            {descriptionLoading ? (
-              <Spinner />
-            ) : (
-              <div className="text-lg mt-2">
-                {generatedDescription
-                  ? formatDescription(generatedDescription)
-                  : "No description available for this dataset."}
-              </div>
-            )}
-          </div>
-
-          <div className="mt-8">
-            <div className="flex items-center">
-              <h4 className="text-2xl font-semibold text-primary_text">
-                Preview
-              </h4>
-              <FaBook className="w-10" />
-            </div>
-            {csvLoading ? (
-              <Spinner />
-            ) : csvData.length > 0 ? (
-              <div className="mt-4 overflow-x-auto max-h-[500px] border-2 rounded-sm border-primary/20">
-                <table className="min-w-full table-auto">
-                  <thead>
-                    <tr className="bg-primary/10">
-                      {Object.keys(csvData[0]).map((key) => (
-                        <th key={key} className="px-4 py-2 text-left">
-                          {key}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {csvData.map((row, index) => (
-                      <tr key={index} className="border-b">
-                        {Object.values(row).map((value, idx) => (
-                          <td key={idx} className="px-4 py-2">
-                            {String(value)}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-primary/60">
-                No preview available for this dataset.
-              </p>
-            )}
-          </div>
-
-          <div className="mt-6">
-            <div className="flex items-center">
-              <h4 className="text-2xl font-semibold text-primary_text">
-                Ask AI
-              </h4>
-              <FaRobot className="w-10" />
-            </div>
-
-            <div className="mt-4">
-              {responses.map((resp, index) => (
-                <div
-                  key={index}
-                  className="p-4 mb-2 border rounded-lg bg-background text-primary_text"
-                >
-                  <h5 className="font-semibold">AI Response {index + 1}:</h5>
-                  <p>{resp}</p>
-                </div>
-              ))}
-            </div>
-
-            <form onSubmit={handleQuerySubmit} className="mt-4">
-              <input
-                autoFocus
-                id="askAI"
-                type="text"
-                value={userQuery}
-                onChange={(e) => setUserQuery(e.target.value)}
-                className="w-full p-2 border rounded-lg"
-                placeholder="Write your query about the dataset here."
-                required
-              />
-              <button
-                type="submit"
-                className="mt-2 p-2 bg-primary text-white rounded-lg min-w-20"
-              >
-                {queryLoading ? "Asking..." : "Ask"}
-              </button>
-            </form>
-          </div>
+          <DatasetDescription description={generatedDescription} loading={descriptionLoading} />
+          <DatasetPreview csvData={csvData} loading={csvLoading} />
+          <AskAISection csvData={csvData} />
           <BuyDatasetSection dataset={dataset} handlePurchase={handlePurchase} />
         </div>
       </div>

@@ -8,9 +8,9 @@ import {
 } from "react-router-dom";
 import DashboardPage from "./pages/Dashboard.js";
 import AddDatasetPage from "./pages/AddDataSet.js";
-import Community from "./components/Community.js";
 import PrivateRoute from "./components/PrivateRoute.js";
 import DatasetPage from "./pages/DatasetPage.js";
+import Community from "./pages/Community.js";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
