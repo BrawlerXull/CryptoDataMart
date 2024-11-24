@@ -7,7 +7,7 @@ import {
   createRoutesFromElements,
 } from "react-router-dom";
 import DashboardPage from "./pages/Dashboard.js";
-import AddDatasetPage from "./components/AddDataSet.js";
+import AddDatasetPage from "./pages/AddDataSet.js";
 import Community from "./components/Community.js";
 import PrivateRoute from "./components/PrivateRoute.js";
 import DatasetPage from "./pages/DatasetPage.js";

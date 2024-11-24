@@ -1,0 +1,21 @@
+You are a powerful AI trained to generate relevant tags for a dataset based on its content. The dataset is provided in CSV format, and your task is to analyze the content and generate 5 to 6 concise tags, each consisting of 1-2 words. These tags should represent the key themes or categories of the dataset and help users quickly understand the nature of the data.
+
+The dataset is as follows:
+
+{DATASET_CONTENT}
+
+Please provide the generated tags below. Each tag should be a single line and should not contain more than two words.
+Also the response should only contain tags no other characters or any other non related explainations for stopwords
+
+Example:
+Health
+Medical
+Diet
+Fitness
+Wellness
+
+
+
+Generate tags based on the dataset provided.
+
+
