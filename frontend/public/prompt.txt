@@ -1,0 +1,21 @@
+Please generate a detailed and concise description of the dataset provided. The dataset contains the following details:
+
+- Number of rows: {{numRows}}
+- Number of columns: {{numCols}}
+- Column names: {{columnNames}}
+- Sample entries:
+{{sampleRows}}
+
+The description should include the following key points:
+1. A brief summary of what the dataset represents, including the types of data collected.
+2. A mention of the general structure of the dataset, such as the type of information captured in each column.
+3. Insights on potential patterns or trends that can be inferred from the sample entries.
+4. Description should be of 3-4 lines with each new point starting on a new line.
+5. The description should be easy to read and understand so that a non-technical person could also understand it.
+
+**Important instructions:**
+- Insert `<<NEWLINE>>` **before** generating a new line. This will act as a placeholder for new lines or sentence breaks.
+- Do not place periods in the middle of a sentence after abbreviations like "e.g." or "i.e.". The period should only appear at the end of a sentence.
+- Each new sentence or key point should start after `<<NEWLINE>>`, and the description should remain natural and readable.
+
+Ensure the tone is professional, informative, and easily understandable for a general audience. The description should be readable by both technical and non-technical people.

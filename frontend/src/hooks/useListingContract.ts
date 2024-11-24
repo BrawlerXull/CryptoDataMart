@@ -84,8 +84,8 @@ const useListingContract = () => {
 
     try {
       const tx = await contractWithSigner.createListing(
-        previewCid,
         fullCid,
+        previewCid,
         price,
         rentPricePerHour,
         tags

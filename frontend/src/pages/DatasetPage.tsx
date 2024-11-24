@@ -1,54 +1,81 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useListingContract from "../hooks/useListingContract";
 import Spinner from "../components/Spinner";
 import Header from "../components/Header";
-import Papa from "papaparse";
+import usePromptTemplate from "../hooks/usePromptTemplate";
+import useCsvData from "../hooks/useCsvData";
+import { useDatasetDescription } from "../hooks/useDatasetDescription";
 import { Listing } from "../types/listing";
+import { formatCreationTime } from "../utils/helphers";
+import toast from "react-hot-toast";
 
 const DatasetPage = () => {
   const { id } = useParams();
   const { listingData } = useListingContract();
-
-  const [loading, setLoading] = useState<boolean>(true);
+  const {
+    promptTemplate,
+    loading: promptLoading,
+    error: promptError,
+  } = usePromptTemplate();
   const [dataset, setDataset] = useState<Listing | null>(null);
-  const [csvData, setCsvData] = useState<any[]>([]);
+  const {
+    csvData,
+    loading: csvLoading,
+    error: csvError,
+  } = useCsvData(dataset?.previewIpfsLink || "");  
+
+  const { generatedDescription, descriptionLoading } = useDatasetDescription(
+    dataset?.id || 0,
+    promptTemplate || "",
+    csvData
+  );
 
   useEffect(() => {
     if (id) {
       const numericId = parseInt(id, 10);
-      const foundDataset = listingData.find((listing) => listing.id === numericId);
-      if (foundDataset) {
-        setDataset(foundDataset);
-      }
-      setLoading(false);
+      const foundDataset = listingData.find(
+        (listing) => listing.id === numericId
+      );
+      setDataset(foundDataset || null);
     }
   }, [id, listingData]);
 
   useEffect(() => {
-    if (dataset && dataset.previewIpfsLink) {
-      const fetchCsvData = async () => {
-        try {
-          const response = await fetch(`https://gateway.pinata.cloud/ipfs/${dataset.previewIpfsLink}`);
-          const text = await response.text();
-          
-          const parsedData = Papa.parse(text, { header: true });
-          setCsvData(parsedData.data);
-        } catch (error) {
-          console.error("Error fetching CSV file:", error);
-        }
-      };
-      fetchCsvData();
+    if (csvError) {
+      toast.error(`Error loading CSV data: ${csvError || "Unknown error"}`);
     }
-  }, [dataset]);
+  }, [csvError]);
 
-  if (loading) {
-    return <Spinner />;
+  if (promptLoading || descriptionLoading || csvLoading) {
+    return (
+      <div>
+        <Header />
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (promptError) {
+    return (
+      <div>Error loading prompt template: {promptError || "Unknown error"}</div>
+    );
   }
 
   if (!dataset) {
     return <div>Dataset not found.</div>;
   }
+
+  const formatDescription = (description: string) => {
+    const sentences = description.split(".").map((sentence) => sentence.trim()).filter(Boolean);
+    return (
+      <ul className="list-disc pl-5">
+        {sentences.map((sentence, index) => (
+          <li key={index}>{sentence}.</li> 
+        ))}
+      </ul>
+    );
+  };
 
   return (
     <div>
@@ -61,29 +88,39 @@ const DatasetPage = () => {
             <h1 className="text-4xl font-extrabold text-primary_text mb-4">
               {`Dataset #${dataset.id + 1}`}
             </h1>
-
-            {/* Created on Date */}
             <div className="text-lg text-primary/80">
               <p>{formatCreationTime(dataset.creationTime)}</p>
             </div>
           </div>
 
-          {/* Description Section */}
           <div className="mt-8">
-            <h4 className="text-2xl font-semibold text-primary_text">Description</h4>
-            <p className="text-primary/80 text-lg mt-2">{'No description available for this dataset.'}</p>
+            <h4 className="text-2xl font-semibold text-primary_text">
+              Description
+            </h4>
+            {descriptionLoading ? (
+              <Spinner />
+            ) : (
+              <div className="text-lg mt-2">
+                {generatedDescription ? formatDescription(generatedDescription) : "No description available for this dataset."}
+              </div>
+            )}
           </div>
 
-          {/* Preview Section - CSV Table */}
           <div className="mt-8">
-            <h4 className="text-2xl font-semibold text-primary_text">Preview</h4>
-            {csvData.length > 0 ? (
-              <div className="mt-4 overflow-x-auto max-h-[500px]">  {/* Set a max height here */}
+            <h4 className="text-2xl font-semibold text-primary_text">
+              Preview
+            </h4>
+            {csvLoading ? (
+              <Spinner />
+            ) : csvData.length > 0 ? (
+              <div className="mt-4 overflow-x-auto max-h-[500px] border-2 rounded-sm border-primary/20">
                 <table className="min-w-full table-auto">
                   <thead>
                     <tr className="bg-primary/10">
                       {Object.keys(csvData[0]).map((key) => (
-                        <th key={key} className="px-4 py-2 text-left">{key}</th>
+                        <th key={key} className="px-4 py-2 text-left">
+                          {key}
+                        </th>
                       ))}
                     </tr>
                   </thead>
@@ -91,7 +128,9 @@ const DatasetPage = () => {
                     {csvData.map((row, index) => (
                       <tr key={index} className="border-b">
                         {Object.values(row).map((value, idx) => (
-                          <td key={idx} className="px-4 py-2">{String(value)}</td>  
+                          <td key={idx} className="px-4 py-2">
+                            {String(value)}
+                          </td>
                         ))}
                       </tr>
                     ))}
@@ -99,11 +138,12 @@ const DatasetPage = () => {
                 </table>
               </div>
             ) : (
-              <p className="text-primary/60">No preview available for this dataset.</p>
+              <p className="text-primary/60">
+                No preview available for this dataset.
+              </p>
             )}
           </div>
 
-          {/* Tags Section */}
           <div className="mt-6">
             <h4 className="text-2xl font-semibold text-primary_text">Tags</h4>
             {dataset.tags.length > 0 ? (
@@ -118,30 +158,15 @@ const DatasetPage = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-primary/60">No tags available for this dataset.</p>
+              <p className="text-primary/60">
+                No tags available for this dataset.
+              </p>
             )}
           </div>
-
         </div>
       </div>
     </div>
   );
-};
-
-// Helper function to format creation timestamp
-const formatCreationTime = (timestamp: number): string => {
-  const date = new Date(timestamp * 1000);
-
-  const options: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true,
-  };
-
-  return new Intl.DateTimeFormat('en-US', options).format(date);
 };
 
 export default DatasetPage;
