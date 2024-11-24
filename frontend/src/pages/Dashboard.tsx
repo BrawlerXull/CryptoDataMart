@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import useListingContract from "../hooks/useListingContract";
 import { ethers } from "ethers";
+import { Listing } from "../types/listing";
 
 const DashboardPage = () => {
   const [sortMethod, setSortMethod] = useState("recent");
@@ -133,16 +134,16 @@ const DashboardPage = () => {
             ))}
           </div>
           <section className="space-y-8 mt-8">
-            {paginatedListings.map((listing, index) => (
+            {paginatedListings.map((listing: Listing, index: number) => (
               <div
                 key={index}
                 className="bg-background p-4 rounded-lg shadow-xl border border-secondary/80"
               >
-                <div>
-                  <h3 className="font-bold text-lg text-primary_text line-clamp-1">
-                    Title Placeholder: {`Dataset #${index + 1}`}
-                  </h3>
-                </div>
+                <Link to={`/dashboard/dataset/${listing.id}`}>
+                    <h3 className="font-bold text-lg text-primary_text line-clamp-1">
+                      Title Placeholder: {`Dataset #${listing.id + 1}`}
+                    </h3>
+                </Link>
 
                 <div className="mb-2">
                   <p className="text-primary/80">Price: {ethers.utils.formatEther(listing.price)} ETH</p>

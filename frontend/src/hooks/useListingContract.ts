@@ -1,20 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { fetchListingData, fetchNextListingId } from '../utils/listingContractHelpers';
 import { getListingContract } from '../utils/contract';
 import toast from 'react-hot-toast';
-
-interface ListingData {
-  creator: string;
-  price: ethers.BigNumber;
-  tags: string[];
-  likes: number;
-  creationTime: number;
-}
+import { Listing } from '../types/listing';
 
 const useListingContract = () => {
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
-  const [listingData, setListingData] = useState<ListingData[]>([]);
+  const [listingData, setListingData] = useState<Listing[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [creatingListing, setCreatingListing] = useState<boolean>(false);
 
@@ -24,6 +17,7 @@ const useListingContract = () => {
   const [rentPricePerHour, setRentPricePerHour] = useState<number>(0);
   const [tags, setTags] = useState<string[]>([]);
 
+  
   useEffect(() => {
     const initProvider = async () => {
       if (window.ethereum) {
@@ -31,25 +25,23 @@ const useListingContract = () => {
         setProvider(web3Provider);
         console.log('Ethereum provider initialized');
       } else {
-        alert('Please install MetaMask to interact with the blockchain.');
+        toast.error('Please install MetaMask to interact with the blockchain.');
       }
     };
 
     initProvider();
   }, []);
 
+  
   useEffect(() => {
     if (provider) {
-      console.log('Provider is ready. Fetching listings...');
       fetchAllListings();
     }
-  }, [provider]);
+  }, [provider]); 
 
-  const fetchAllListings = async () => {
-    if (!provider) {
-      console.log('Provider not yet initialized, returning early');
-      return;
-    }
+  
+  const fetchAllListings = useCallback(async () => {
+    if (!provider) return; 
 
     setIsLoading(true);
 
@@ -59,21 +51,22 @@ const useListingContract = () => {
 
       const listingsPromises = [];
       for (let i = 0; i < nextListingId.toNumber(); i++) {
-        listingsPromises.push(fetchListingData(provider, i)); 
+        listingsPromises.push(fetchListingData(provider, i));
       }
 
       const listings = await Promise.all(listingsPromises);
       console.log('Fetched All Listings:', listings);
 
-      setListingData(listings); 
+      setListingData(listings);
     } catch (err: any) {
       console.error('Error fetching listings:', err);
-      alert('An error occurred while fetching the listings.');
+      toast.error('An error occurred while fetching the listings.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [provider]); 
 
+  
   const createNewListing = async (
     previewCid: string,
     fullCid: string,
@@ -81,10 +74,7 @@ const useListingContract = () => {
     rentPricePerHour: number,
     tags: string[]
   ) => {
-    if (!provider) {
-      console.log('Provider not initialized.');
-      return;
-    }
+    if (!provider) return;
 
     setCreatingListing(true);
 
@@ -104,12 +94,12 @@ const useListingContract = () => {
       console.log('Transaction sent:', tx);
       await tx.wait(); 
       console.log('Listing created successfully.');
-      toast.success('Listing created successfully.');
 
-      fetchAllListings();
-    } catch (err) {
+      toast.success('Listing created successfully.');
+      fetchAllListings(); 
+    } catch (err: any) {
       console.error('Error creating listing:', err);
-      alert('An error occurred while creating the listing.');
+      toast.error('An error occurred while creating the listing.');
     } finally {
       setCreatingListing(false);
     }
