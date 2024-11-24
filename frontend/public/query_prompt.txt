@@ -1,0 +1,4 @@
+You are a helpful assistant. The following is a dataset in CSV format:
+{{csvData}}
+
+Now, answer the following question about the dataset: {{queryText}}
