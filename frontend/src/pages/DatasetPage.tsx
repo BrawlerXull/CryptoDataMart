@@ -7,12 +7,12 @@ import usePromptTemplate from "../hooks/usePromptTemplate";
 import useCsvData from "../hooks/useCsvData";
 import { useDatasetDescription } from "../hooks/useDatasetDescription";
 import { Listing } from "../types/listing";
-import { formatCreationTime } from "../utils/helphers";
 import toast from "react-hot-toast";
 import DatasetDescription from "../components/DatasetDescription";
 import AskAISection from "../components/AskAISection";
 import DatasetPreview from "../components/DatasetPreview";
 import BuyDatasetSection from "../components/BuyDatasetSection";
+import DatasetTitle from "../components/DatasetTitle";
 
 const DatasetPage = () => {
   const { id } = useParams();
@@ -85,19 +85,21 @@ const DatasetPage = () => {
       </div>
       <div className="min-h-screen bg-background text-primary_text p-8">
         <div className="bg-background p-8 max-w-6xl mx-auto">
-          <div className="flex justify-between">
-            <h1 className="text-4xl font-extrabold text-primary_text mb-4">{`Dataset #${
-              dataset.id + 1
-            }`}</h1>
-            <div className="text-lg text-primary/80">
-              <p>{formatCreationTime(dataset.creationTime)}</p>
-            </div>
-          </div>
-
-          <DatasetDescription description={generatedDescription} loading={descriptionLoading} />
+          <DatasetTitle
+            datasetId={dataset.id}
+            creationTime={dataset.creationTime}
+            tags={dataset.tags}
+          />
+          <DatasetDescription
+            description={generatedDescription}
+            loading={descriptionLoading}
+          />
           <DatasetPreview csvData={csvData} loading={csvLoading} />
           <AskAISection csvData={csvData} />
-          <BuyDatasetSection dataset={dataset} handlePurchase={handlePurchase} />
+          <BuyDatasetSection
+            dataset={dataset}
+            handlePurchase={handlePurchase}
+          />
         </div>
       </div>
     </div>
