@@ -33,16 +33,7 @@ const DatasetPage = () => {
     promptTemplate || "",
     csvData
   );
-
-  const handlePurchase = () => {
-    if (!dataset?.price) {
-      toast.error("This dataset is not available for purchase.");
-      return;
-    }
-
-    toast.success(`Proceeding to buy the dataset for ${dataset.price}`);
-  };
-
+  
   useEffect(() => {
     if (id) {
       const numericId = parseInt(id, 10);
@@ -98,7 +89,6 @@ const DatasetPage = () => {
           <AskAISection csvData={csvData} />
           <BuyDatasetSection
             dataset={dataset}
-            handlePurchase={handlePurchase}
           />
         </div>
       </div>

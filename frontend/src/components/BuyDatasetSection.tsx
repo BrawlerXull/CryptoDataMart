@@ -1,14 +1,46 @@
-import React from "react";
-import {  } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
 import { FaMoneyCheckDollar, FaShop } from "react-icons/fa6";
 import { Listing } from "../types/listing";
+import usePaymentContract from "../hooks/usePaymentContract";
+import toast from 'react-hot-toast';
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 
 interface BuyDatasetSectionProps {
   dataset: Listing | null;
-  handlePurchase: () => void;
 }
 
-const BuyDatasetSection: React.FC<BuyDatasetSectionProps> = ({ dataset, handlePurchase }) => {
+const BuyDatasetSection: React.FC<BuyDatasetSectionProps> = ({ dataset }) => {
+  const { buyDataset, isLoading } = usePaymentContract();
+  const [price, setPrice] = useState<number>(0);
+  const wallet = useSelector((state: RootState) => state.wallet);
+
+  useEffect(() => {
+    if (dataset) {
+      setPrice(Number(dataset.price));
+    }
+  }, [dataset]);
+
+  const handlePurchase = async () => {
+
+    if (!wallet.isConnected) {
+        toast.error("Please connect your wallet before purchasing.");
+        return;
+    }
+  
+    if (!dataset || !price) {
+      toast.error("Dataset details are not valid");
+      return;
+    }
+
+    try {
+      await buyDataset(dataset.id, price);
+    } catch (error) {
+      console.error('Error purchasing dataset:', error);
+      toast.error(`Failed to purchase the dataset.`);
+    }
+  };
+
   return (
     <div className="mt-8 flex justify-center">
       <div className="rounded-3xl max-w-xl rounded-t-3xl bg-background p-8 ring-1 sm:mx-8 sm:rounded-b-none sm:p-10 lg:mx-0 lg:rounded-3xl">
@@ -76,9 +108,10 @@ const BuyDatasetSection: React.FC<BuyDatasetSectionProps> = ({ dataset, handlePu
         <div className="mt-8">
           <button
             onClick={handlePurchase}
+            disabled={isLoading || !dataset}
             className="w-full flex justify-center rounded-lg bg-primary py-2 px-4 text-white"
           >
-            Buy Dataset
+            {isLoading ? "Processing..." : "Buy Dataset"}
           </button>
         </div>
       </div>
