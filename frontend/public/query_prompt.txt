@@ -2,3 +2,14 @@ You are a helpful assistant. The following is a dataset in CSV format:
 {{csvData}}
 
 Now, answer the following question about the dataset: {{queryText}}
+
+Please provide your answer in **Markdown format** with the following structure:
+1. **Heading** for each major section (e.g., Introduction, Key Insights, Conclusion).
+2. Use **bold** for important points and keywords.
+3. Use *italics* for clarifications, minor notes, or additional context.
+4. Organize your response using:
+   - **Bullet points** for lists of insights, actions, or findings.
+   - **Numbered lists** for ordered steps or comparisons.
+5. Add **code blocks** if displaying any structured data or formulas.
+
+Ensure the answer is clear, well-structured, and easy to read.
