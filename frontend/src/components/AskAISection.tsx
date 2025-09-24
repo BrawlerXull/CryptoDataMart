@@ -38,7 +38,7 @@ const AskAISection: React.FC<AskAISectionProps> = ({ csvData }) => {
     navigator.clipboard.writeText(code).then(() => {
       toast.success('Code copied to clipboard!');
     }).catch((err) => {
-      toast.error('Failed to copy code');
+      toast.error('Failed to copy the code');
       console.error(err);
     });
   };
